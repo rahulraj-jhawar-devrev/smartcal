@@ -18,6 +18,7 @@ jobs:
           script: |
             cd ~/smartcal
             git pull origin main
-            npm install --omit=dev
+            npm install
+            npm run build
             systemctl --user restart smartcal
             echo "Deploy complete"

@@ -1,23 +1,31 @@
-const Anthropic = require('@anthropic-ai/sdk');
+import Anthropic from '@anthropic-ai/sdk';
+import type { Constraint, GeneratedSchedule, Task } from './types';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function stripFences(text) {
+function stripFences(text: string): string {
   return text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
 }
 
-async function generateSchedule(tasks, constraints, date) {
+export async function generateSchedule(
+  tasks: Task[],
+  constraints: Constraint[],
+  date: string,
+): Promise<GeneratedSchedule> {
   const c = Object.fromEntries(constraints.map(r => [r.key, r.value]));
   const today = new Date(date);
 
-  const taskList = tasks.length === 0
-    ? 'No pending tasks.'
-    : tasks.map(t => {
-        const daysLeft = t.deadline
-          ? Math.ceil((new Date(t.deadline) - today) / 86400000)
-          : null;
-        return `  - id:${t.id} | "${t.title}" | ${t.duration_mins}min | priority:${t.priority} | type:${t.type}${daysLeft !== null ? ` | deadline in ${daysLeft} day(s)` : ''}`;
-      }).join('\n');
+  const taskList =
+    tasks.length === 0
+      ? 'No pending tasks.'
+      : tasks
+          .map(t => {
+            const daysLeft = t.deadline
+              ? Math.ceil((new Date(t.deadline).getTime() - today.getTime()) / 86400000)
+              : null;
+            return `  - id:${t.id} | "${t.title}" | ${t.duration_mins}min | priority:${t.priority} | type:${t.type}${daysLeft !== null ? ` | deadline in ${daysLeft} day(s)` : ''}`;
+          })
+          .join('\n');
 
   const prompt = `You are a personal productivity planner. Generate a realistic, optimized time-blocked schedule for ${date}.
 
@@ -55,13 +63,11 @@ Return ONLY a raw JSON object with no markdown fences, no extra text. Schema:
   });
 
   const textBlock = response.content.find(b => b.type === 'text');
-  if (!textBlock) throw new Error('No text output from model');
+  if (!textBlock || textBlock.type !== 'text') throw new Error('No text output from model');
 
-  const parsed = JSON.parse(stripFences(textBlock.text));
+  const parsed = JSON.parse(stripFences(textBlock.text)) as GeneratedSchedule;
   if (!parsed.blocks || !Array.isArray(parsed.blocks)) {
     throw new Error('Invalid schedule shape returned by model');
   }
   return parsed;
 }
-
-module.exports = { generateSchedule };

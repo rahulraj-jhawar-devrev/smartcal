@@ -22,30 +22,31 @@ app.get('/tasks', (_req: Request, res: Response) => {
 });
 
 app.post('/tasks', (req: Request, res: Response) => {
-  const { title, deadline, duration_mins = 30, type = 'task', priority = 'medium' } =
+  const { title, notes, deadline, duration_mins = 30, type = 'task', priority = 'medium' } =
     req.body as Partial<Task>;
   if (!title) return res.status(400).json({ error: 'title is required' });
   const result = db
-    .prepare('INSERT INTO tasks (title, deadline, duration_mins, type, priority) VALUES (?, ?, ?, ?, ?)')
-    .run(title, deadline ?? null, duration_mins, type, priority);
+    .prepare('INSERT INTO tasks (title, notes, deadline, duration_mins, type, priority) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(title, notes ?? null, deadline ?? null, duration_mins, type, priority);
   const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(result.lastInsertRowid) as Task;
   res.status(201).json(task);
 });
 
 app.patch('/tasks/:id', (req: Request, res: Response) => {
-  const { title, deadline, duration_mins, type, priority, status } = req.body as Partial<Task>;
+  const { title, notes, deadline, duration_mins, type, priority, status } = req.body as Partial<Task>;
   const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id) as Task | undefined;
   if (!task) return res.status(404).json({ error: 'task not found' });
   db.prepare(`
     UPDATE tasks SET
       title = COALESCE(?, title),
+      notes = COALESCE(?, notes),
       deadline = COALESCE(?, deadline),
       duration_mins = COALESCE(?, duration_mins),
       type = COALESCE(?, type),
       priority = COALESCE(?, priority),
       status = COALESCE(?, status)
     WHERE id = ?
-  `).run(title, deadline, duration_mins, type, priority, status, req.params.id);
+  `).run(title, notes, deadline, duration_mins, type, priority, status, req.params.id);
   res.json(db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id) as Task);
 });
 

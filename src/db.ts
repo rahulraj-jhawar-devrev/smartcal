@@ -7,6 +7,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
+    notes TEXT,
     deadline TEXT,
     duration_mins INTEGER DEFAULT 30,
     type TEXT DEFAULT 'task',
@@ -28,6 +29,13 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 `);
+
+// Migrate: add notes column if it doesn't exist yet (for existing DBs)
+try {
+  db.exec('ALTER TABLE tasks ADD COLUMN notes TEXT');
+} catch {
+  // column already exists — fine
+}
 
 const existing = db.prepare('SELECT count(*) as c FROM constraints').get() as { c: number };
 if (existing.c === 0) {

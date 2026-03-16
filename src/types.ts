@@ -1,6 +1,7 @@
 export interface Task {
   id: number;
   title: string;
+  notes: string | null;
   deadline: string | null;
   duration_mins: number;
   type: string;

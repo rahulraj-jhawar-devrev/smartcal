@@ -1,7 +1,7 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+import Database from 'better-sqlite3';
+import path from 'path';
 
-const db = new Database(path.join(__dirname, 'smartcal.db'));
+const db = new Database(path.join(__dirname, '..', 'smartcal.db'));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS tasks (
@@ -29,11 +29,10 @@ db.exec(`
   );
 `);
 
-// Seed default constraints if none exist
-const existing = db.prepare('SELECT count(*) as c FROM constraints').get();
+const existing = db.prepare('SELECT count(*) as c FROM constraints').get() as { c: number };
 if (existing.c === 0) {
   const insert = db.prepare('INSERT OR IGNORE INTO constraints (key, value) VALUES (?, ?)');
-  const defaults = [
+  const defaults: [string, string][] = [
     ['wake_time', '07:00'],
     ['sleep_time', '23:00'],
     ['gym_enabled', 'false'],
@@ -47,4 +46,4 @@ if (existing.c === 0) {
   defaults.forEach(([k, v]) => insert.run(k, v));
 }
 
-module.exports = db;
+export default db;

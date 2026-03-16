@@ -2,9 +2,11 @@
   "name": "smartcal",
   "version": "1.0.0",
   "description": "AI-powered smart calendar backend",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node index.js"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +14,12 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "better-sqlite3": "^12.8.0",
-    "express": "^5.2.1",
-    "zod": "^4.3.6"
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
   }
 }

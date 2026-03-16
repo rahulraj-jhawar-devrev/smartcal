@@ -1,0 +1,4 @@
+node_modules/
+smartcal.db
+.env
+*.pem

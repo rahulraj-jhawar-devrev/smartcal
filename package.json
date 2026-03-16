@@ -1,0 +1,18 @@
+{
+  "name": "smartcal",
+  "version": "1.0.0",
+  "description": "AI-powered smart calendar backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "better-sqlite3": "^12.8.0",
+    "express": "^5.2.1",
+    "zod": "^4.3.6"
+  }
+}
